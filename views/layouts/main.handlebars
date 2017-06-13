@@ -9,9 +9,13 @@
     <ul class="menu">
       <li><a href="/">Home</a></li>
       <li><a href="/about">About</a></li>
-      <li><a href="/xxx/all">**All</a></li>
+      <li><a href="/list">List thread</a></li>
+      {{#if currentUser}}
+        <li><a href="/add">Add thread</a></li>
+      {{/if}}
       {{#if isAdmin}}
-        <li><a href="/xxx/add">**Add xxx</a></li>
+        <li><a href="/categories">Categories</a></li>
+        <li><a href="/category/add">Add category</a></li>
       {{/if}}
       <li></li>
       {{#if currentUser}}

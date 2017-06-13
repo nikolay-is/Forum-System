@@ -8,6 +8,13 @@ Handlebars.registerHelper('ifCond', function (v1, v2, options) {
   return options.inverse(this)
 })
 
+Handlebars.registerHelper('selected', function (option, value) {
+  if (option === value) {
+    return ' selected'
+  } else {
+    return ''
+  }
+})
 // {{#ifCond v1 v2}}
 //     {{v1}} is equal to {{v2}}
 // {{else}}

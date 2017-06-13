@@ -1,8 +1,9 @@
 const mongoose = require('mongoose')
 const User = require('../models/User')
+const Category = require('../models/Category')
 
 // require('../models/xxx')
-require('../models/Category')
+// require('../models/Category')
 require('../models/Thread')
 require('../models/Answer')
 
@@ -20,6 +21,7 @@ module.exports = (settings) => {
     console.log(`MongoDB connected to "${settings.dbName}" database on port: ${settings.dbPort}`)
 
     User.seedAdminUser()
+    Category.seedCategory()
   })
 
   db.on('error', err => console.log(`Database error: ${err}`))

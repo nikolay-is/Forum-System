@@ -1,0 +1,9 @@
+<h1>Categories</h1>
+{{#each categories}}
+  <p>
+    {{this.name}}
+    {{#if ../isAdmin}}
+      <a href="/category/delete/{{this._id}}">Delete</a>
+    {{/if}}
+  </p>
+{{/each}}

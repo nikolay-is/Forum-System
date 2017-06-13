@@ -1,0 +1,18 @@
+<form action="/list" method="GET">
+  <input type="text" name="search" />
+  <input type="submit" value="Search" />
+</form>
+{{#each threads}}
+  <div class="mb60 car-details" >
+    <h2>Title: {{this.title}}</h2>
+    <h3>Description: {{this.description}}</h3>
+    <p>Thread Date: {{this.date}}</p>
+    <p>Last Answer: {{this.lastAnswerDate}}</p>
+    <p>Category Name:{{this.category.name}}</p>
+    {{#if ../isAdmin}}
+      <a href="/edit/{{this._id}}">Edit</a>
+      <a href="/delete/{{this._id}}">Delete</a>
+    {{/if}}
+  </div>
+{{/each}}
+</div>

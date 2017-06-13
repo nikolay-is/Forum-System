@@ -1,0 +1,17 @@
+<form method="POST">
+  <h2>Title: {{thread.title}}</h2>
+  <h3>Description: {{thread.description}}</h3>
+  <p>Thread Date: {{thread.date}}</p>
+  <p>Last Answer: {{thread.lastAnswerDate}}</p>
+  <p>Category Name:{{thread.category.name}}</p>
+  {{#each thread.answers}}
+    {{this.content}}
+    {{this.date}}
+  {{/each}}
+  <br />
+  Description
+  <textarea name="content" rows="10" required>{{content}}</textarea>
+  <br />
+  <br />
+  <input type="submit" value="Post" />
+</form>

@@ -1,0 +1,16 @@
+<form action="/add" method="POST">
+  Title
+  <input type="text" name="title" value="{{title}}" required />
+  <br />
+  Description
+  <textarea name="description" rows="10" required>{{description}}</textarea>
+  <br />
+  Category
+  <select name="category" >
+    {{#each categories}}
+      <option value="{{this._id}}">{{this.name}}</option>
+    {{/each}}
+  </select>
+  <br />
+  <input type="submit" value="Save" />
+</form>

@@ -1,6 +1,12 @@
-<h1>Welcomme to Forum</h1>
-<h2>Administrator data</h2>
-<p>Username: <strong>admin</strong></p>
-<p>Password: <strong>123</strong></p>
-
-<p>List 20 forum threads ordered by their last answer’s date. The newest ones should be on top. Visible to anonymous users.</p>
+{{#each threads}}
+  <div class="mb60 car-details" >
+    <h2>Title: {{this.title}}</h2>
+    <h3>Description: {{this.description}}</h3>
+    <h3>Category Name:{{this.category.name}}</h3>
+    <p>Thread Date: {{this.date}}</p>
+    <p>Last Answer: {{this.lastAnswerDate}}</p>
+    <a href="/post/{{this._id}}/{{this.title}}">Show</a>
+    <hr />
+  </div>
+{{/each}}
+</div>
