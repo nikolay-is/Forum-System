@@ -1,0 +1,13 @@
+npm install body-parser --save --save-exact
+npm install cookie-parser --save --save-exact
+npm install express --save --save-exact
+npm install express-handlebars --save --save-exact
+npm install express-session --save --save-exact
+npm install mongoose --save --save-exact
+npm install multer --save --save-exact
+npm install passport --save --save-exact
+npm install passport-local --save --save-exact
+npm install standard --save-dev --save-exact
+npm install typings --save-dev --save-exact
+typings install express --save --save-exact
+typings install mongoose --save --save-exact
