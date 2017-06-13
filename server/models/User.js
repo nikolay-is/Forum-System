@@ -10,7 +10,8 @@ let userSchema = new mongoose.Schema({
   lastName: { type: String, required: REQUIRED_VALIDATION_MESSAGE },
   salt: { type: String },
   hashedPass: { type: String },
-  roles: [String]
+  roles: [String],
+  blocked: { type: Boolean, default: false }
 })
 
 userSchema.method({

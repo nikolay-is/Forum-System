@@ -2,6 +2,9 @@ const mongoose = require('mongoose')
 const User = require('../models/User')
 
 // require('../models/xxx')
+require('../models/Category')
+require('../models/Thread')
+require('../models/Answer')
 
 mongoose.Promise = global.Promise
 
