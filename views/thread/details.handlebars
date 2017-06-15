@@ -1,17 +1,51 @@
-<form method="POST">
+<h1>Thread details</h1>
+
+<div class="mb60 car-details" >
   <h2>Title: {{thread.title}}</h2>
   <h3>Description: {{thread.description}}</h3>
+  <h3>Category Name: {{thread.category.name}}</h3>
+  <p>Author: <a href="/profile/{{thread.author.username}}">{{thread.author.username}}</a></p>
   <p>Thread Date: {{thread.date}}</p>
   <p>Last Answer: {{thread.lastAnswerDate}}</p>
-  <p>Category Name:{{thread.category.name}}</p>
-  {{#each thread.answers}}
-    {{this.content}}
-    {{this.date}}
-  {{/each}}
-  <br />
-  Description
-  <textarea name="content" rows="10" required>{{content}}</textarea>
-  <br />
-  <br />
-  <input type="submit" value="Post" />
-</form>
+  <p>Views: {{thread.views}} Answers: {{thread.answers.length}} Likes: {{thread.likes}}</p>
+  {{#if isAdmin}}
+    <a href="/edit/{{thread._id}}">Edit</a>
+    <a href="/delete/{{thread._id}}">Delete</a>
+  {{/if}}
+  <hr />
+
+  {{#if currentUser}}
+    {{#if isBlocked}}
+    {{else}}
+      <form method="post">
+        <textarea name="content" rows="10" placeholder="Add your answer..."></textarea>
+        <input type="submit" value="Add" />
+      </form>
+
+      <form id="like" action="/like/{{thread._id}}" method="post">
+      </form>
+      <a href="javascript:document.getElementById('like').submit()">Like</a>
+
+      <form id="dislike" action="/dislike/{{thread._id}}" method="post">
+      </form>
+      <a href="javascript:document.getElementById('dislike').submit()">Dislike</a>
+    {{/if}}
+  {{/if}}
+
+<h1>Answers list</h1>
+{{#each answers}}
+  <div>
+    <p>{{this.content}}</p>
+    <p><a href="/profile/{{this.author.username}}">{{this.author.username}}</a></p>
+    <p>{{this.date}}</p>
+    {{#if ../isAdmin}}
+      <a href="/answer/edit/{{this._id}}">Edit</a>
+      <a href="/answer/delete/{{this._id}}">Delete</a>
+    {{/if}}
+    <hr >
+  </div>
+{{else}}
+  <p>No answers.</p>
+{{/each}}
+
+</div>

@@ -8,16 +8,18 @@ let minDate = new Date(-8640000000000000)
 
 module.exports = {
   index: (req, res) => {
-    Thread.find({}) // $ne
+    Thread.find() // $ne
   // Thread.find({lastAnswerDate: { $gt: minDate }}) // $ne
+    .populate('author')
     .sort('-lastAnswerDate')
     .populate('category')
-    .populate('answers')
+    // .populate('answers')
+    .limit(20)
     .then(threads => {
       if (!threads) {
-        let message = 'Threads is empty!'
-        res.locals.globalError = message
+        res.locals.globalError = 'Threads is empty!'
         res.redirect('/')
+        return
       }
       res.render('home/index', {
         threads: threads
@@ -30,12 +32,17 @@ module.exports = {
     })
   },
   addGet: (req, res) => {
-    Category.find({})
+    if (req.user.isBlocked) {
+      res.locals.globalError = 'You are blocked!'
+      res.redirect('/')
+      return
+    }
+    Category.find()
       .then(categories => {
         if (!categories) {
-          let message = 'Categories is empty!'
-          res.locals.globalError = message
+          res.locals.globalError = 'Categories is empty!'
           res.redirect('/')
+          return
         }
         res.render('thread/add', {
           categories: categories
@@ -46,76 +53,83 @@ module.exports = {
         res.locals.globalError = message
         res.redirect('/')
       })
-    // Thread.find({})
-    //   .then((threads) => {
-
-    //   })
   },
   addPost: (req, res) => {
+    if (req.user.isBlocked) {
+      res.redirect('/')
+      return
+    }
     let thredReq = req.body
+    let categoryId = thredReq.category
     Thread.create({
       title: thredReq.title,
       description: thredReq.description,
-      category: thredReq.category
+      category: categoryId,
+      author: req.user._id
     })
-    .then(category => {
-      res.redirect('/list')
+    .then(thread => {
+      let threadId = thread._id
+      Category.findByIdAndUpdate(categoryId, { $addToSet: { threads: threadId } })
+        .then(() => {
+          res.redirect(`/post/${thread._id}/${thread.title}`)
+        })
     })
     .catch(err => {
-      let message = errorHandler.handleMongooseError(err)
-      res.locals.globalError = message
-      res.render('thread/add', thredReq)
+      res.locals.globalError = errorHandler.handleMongooseError(err)
+      res.render('thread/add', {
+        thread: thredReq
+      })
     })
   },
   list: (req, res) => {
-    Thread.find({}) // $ne
+    let pageSize = 20
+    let page = Number(req.query.page) || 1
+
+    Thread.find() // $ne
     // Thread.find({lastAnswerDate: { $gt: minDate }}) // $ne
-      .sort('-lastAnswerDate')
+      .populate('author')
       .populate('category')
+      .sort('-lastAnswerDate')
+      .skip((page - 1) * pageSize)
+      .limit(pageSize)
       .then(threads => {
         if (!threads) {
-          let message = 'Threads is empty!'
-          res.locals.globalError = message
+          res.locals.globalError = 'Threads is empty!'
           res.redirect('/')
+          return
         }
         res.render('thread/list', {
-          threads: threads
+          threads: threads,
+          hasPrevPage: page > 1,
+          hasNextPage: threads.length === pageSize,
+          prevPage: page - 1,
+          nextPage: page + 1
         })
       })
       .catch(err => {
-        let message = errorHandler.handleMongooseError(err)
-        res.locals.globalError = message
+        res.locals.globalError = errorHandler.handleMongooseError(err)
         res.redirect('/')
       })
   },
-        // .populate('category')
-      // .populate('answers')
-
   editGet: (req, res) => {
     let id = req.params.id
+
     Thread.findById(id)
-      .populate('category')
       .then(thread => {
-        console.log(thread)
-        Category.find({})
+        Category.find()
         .then(categories => {
           if (!categories) {
             res.locals.globalError = 'Categories is empty!'
             res.redirect('/categories')
           }
-          console.log(categories)
-          let editedThread = {
-            title: thread.title,
-            description: thread.description,
-            categories: categories
-          }
 
           res.render('thread/edit', {
-            thread: editedThread
+            thread: thread,
+            categories: categories
           })
         .catch(err => {
           res.locals.globalError = errorHandler.handleMongooseError(err)
-          res.redirect('/list')
+          res.redirect('/categories')
         })
         })
       })
@@ -130,11 +144,22 @@ module.exports = {
 
     Thread.findById(id)
       .then(thread => {
+        let oldCategory = thread.category
         thread.title = threadReq.title
         thread.description = threadReq.description
+        thread.category = threadReq.category
         thread.save()
           .then(() => {
-            res.redirect('/list')
+            if (oldCategory !== threadReq.category) {
+              Category.findByIdAndUpdate(oldCategory, { $pull: { threads: { $in: [thread._id] } } })
+              .then(() => {
+                Category.findByIdAndUpdate(thread.category, { $push: { threads: { _id: thread._id } } })
+                .then(() => {
+                  res.redirect(`/post/${thread._id}/${thread.title}`)
+                })
+              })
+            }
+            res.redirect(`/post/${thread._id}/${thread.title}`)
           })
           .catch(err => {
             res.locals.globalError = errorHandler.handleMongooseError(err)
@@ -148,7 +173,12 @@ module.exports = {
   delete: (req, res) => {
     let id = req.params.id
     Thread.findByIdAndRemove(id)
-      .then(() => {
+      .then((thread) => {
+        Answer.remove({ thread: id })
+          .then(() => {
+            Category.findByIdAndUpdate(thread.category, { $pull: { threads: { $in: [id] } } })
+            .then()
+          })
         res.redirect('/list')
       })
       .catch(err => {
@@ -157,40 +187,66 @@ module.exports = {
       })
   },
   detailsGet: (req, res) => {
-    // console.log(req.params.id)
-    // console.log(req.params.name)
     let id = req.params.id
     Thread.findById(id)
+      .populate('author')
       .populate('category')
-      .populate('answer')
+      // .populate('answer')
       .then(thread => {
-        res.render('thread/details', {
-          thread: thread
-        })
+        Answer.find({ thread: thread._id })
+          .populate('author')
+          .sort('date')
+          .then(answers => {
+            thread.views = thread.views + 1
+            thread.save()
+              .then(thread => {
+                if (req.user) {
+                  res.render('thread/details', {
+                    thread: thread,
+                    answers: answers
+                  })
+                }
+              })
+              .catch(err => {
+                res.locals.globalError = errorHandler.handleMongooseError(err)
+                // res.redirect('/list')
+                res.render('home/index')
+              })
+          })
+          .catch(err => {
+            res.locals.globalError = errorHandler.handleMongooseError(err)
+            // res.redirect('/list')
+            res.render('home/index')
+          })
+      })
+      .catch(err => {
+        res.locals.globalError = errorHandler.handleMongooseError(err)
+        // res.redirect('/list')
+        res.render('home/index')
       })
   },
-  detailsPost: (req, res) => {
+  like: (req, res) => {
     let id = req.params.id
-    let threadReq = req.body
-    console.log(req.params)
-    console.log(threadReq)
-    Answer.create({
-      content: threadReq.content
-    })
-      // .then(thread => {
-      //   thread.title = threadReq.title
-      //   thread.description = threadReq.description
-      //   thread.save()
-      //     .then(() => {
-      //       res.redirect('/list')
-      //     })
-      //     .catch(err => {
-      //       res.locals.globalError = errorHandler.handleMongooseError(err)
-      //       res.redirect('/list')
-      //     })
-      // }).catch(err => {
-      //   res.locals.globalError = errorHandler.handleMongooseError(err)
-      //   res.redirect('/list')
-      // })
+
+    Thread.findById(id)
+      .then(thread => {
+        thread.likes = thread.likes + 1
+        thread.save()
+          .then(() => {
+            res.redirect(`/post/${thread._id}/${thread.title}`)
+          })
+      })
+  },
+  dislike: (req, res) => {
+    let id = req.params.id
+
+    Thread.findById(id)
+      .then(thread => {
+        thread.likes = thread.likes - 1
+        thread.save()
+          .then(() => {
+            res.redirect(`/post/${thread._id}/${thread.title}`)
+          })
+      })
   }
 }

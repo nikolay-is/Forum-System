@@ -1,4 +1,6 @@
-<form method="POST">
+<h1>Edit thread</h1>
+
+<form action="/add" method="POST">
   Title
   <input type="text" name="title" value="{{thread.title}}" required />
   <br />
@@ -6,10 +8,13 @@
   <textarea name="description" rows="10" required>{{thread.description}}</textarea>
   <br />
   Category
-  <select name="category" >
+  <select name="category">
     {{#each categories}}
-      {{!--<p>{{this._id}}</p>--}}
-      <option value="{{this._id}}" {{selected this._id ../thread.category}}>{{this.name}}</option>
+      {{#ifCond ../thread.category this._id}}
+        <option value="{{this._id}}" selected>{{this.name}}</option>
+      {{else}}
+        <option value="{{this._id}}">{{this.name}}</option>
+      {{/ifCond}}
     {{/each}}
   </select>
   <br />

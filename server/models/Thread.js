@@ -8,12 +8,14 @@ let minDate = new Date(-8640000000000000)
 
 let threadSchema = mongoose.Schema({
   title: { type: String, required: REQUIRED_VALIDATION_MESSAGE, unique: true },
-  description: { type: String, required: REQUIRED_VALIDATION_MESSAGE, unique: true },
-  creator: { type: ObjectId, required: REQUIRED_VALIDATION_MESSAGE, ref: 'User' },
+  description: { type: String, required: REQUIRED_VALIDATION_MESSAGE },
+  author: { type: ObjectId, required: REQUIRED_VALIDATION_MESSAGE, ref: 'User' },
   date: { type: Date, default: Date.now },
   lastAnswerDate: { type: Date, default: minDate },
   category: { type: ObjectId, ref: 'Category' },
-  answers: [ { type: ObjectId, ref: 'Answer' } ]
+  answers: [ { type: ObjectId, ref: 'Answer' } ],
+  views: { type: Number, default: 0 },
+  likes: { type: Number, default: 0 }
 })
 
 let Thread = mongoose.model('Thread', threadSchema)

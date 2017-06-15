@@ -5,7 +5,7 @@ const ObjectId = mongoose.Schema.Types.ObjectId
 
 let answerSchema = mongoose.Schema({
   content: { type: String, required: REQUIRED_VALIDATION_MESSAGE, unique: true },
-  creator: { type: ObjectId, required: REQUIRED_VALIDATION_MESSAGE, ref: 'User' },
+  author: { type: ObjectId, required: REQUIRED_VALIDATION_MESSAGE, ref: 'User' },
   thread: { type: ObjectId, ref: 'Thread' },
   date: { type: Date, default: Date.now }
 })

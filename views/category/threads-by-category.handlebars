@@ -1,10 +1,10 @@
-<h1>Hi! List of top 20 of last answered post </h1>
+<h1>Threads for category: {{category.name}}</h1>
 
 {{#each threads}}
   <div class="mb60 car-details" >
     <h2>Title: <a href="/post/{{this._id}}/{{this.title}}">{{this.title}}</a></h2>
     <h3>Description: {{this.description}}</h3>
-    <h3>Category Name: {{this.category.name}}</h3>
+    <h3>Category Name: {{../category.name}}</h3>
     <p>Author: <a href="/profile/{{this.author.username}}">{{this.author.username}}</a></p>
     <p>Thread Date: {{this.date}}</p>
     <p>Last Answer: {{this.lastAnswerDate}}</p>

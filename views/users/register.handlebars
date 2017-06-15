@@ -1,15 +1,15 @@
 <form action="/users/register" method="POST">
   Username
-  <input type="text" name="username" />
+  <input type="text" name="username" value="{{user.username}}"/>
   <br />
   Password
-  <input type="password" name="password" />
+  <input type="password" name="password" value="{{user.password}}" />
   <br />
   First Name
-  <input type="text" name="firstName" />
+  <input type="text" name="firstName" value="{{user.firstName}}" />
   <br />
   Last Name
-  <input type="text" name="lastName" />
+  <input type="text" name="lastName" value="{{user.lastName}}" />
   <br />
   <input type="submit" value="Register" />
 </form>

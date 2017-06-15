@@ -13,13 +13,15 @@
       {{#if currentUser}}
         <li><a href="/add">Add thread</a></li>
       {{/if}}
+      <li><a href="/categories">Categories</a></li>
       {{#if isAdmin}}
-        <li><a href="/categories">Categories</a></li>
         <li><a href="/category/add">Add category</a></li>
+        <li><a href="/admins/all">List admin</a></li>
+        <li><a href="/admins/add">Add admin</a></li>
       {{/if}}
       <li></li>
       {{#if currentUser}}
-        <li><a href="/users/me">{{currentUser.username}}</a></li>
+        <li><a href="/profile/{{currentUser.username}}">{{currentUser.username}}</a></li>
         <li>
             <form id="logout-form" action="/users/logout" method="POST"></form>
             <a href="javascript:document.getElementById('logout-form').submit()">Logout</a>

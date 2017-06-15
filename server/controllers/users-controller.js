@@ -1,6 +1,10 @@
 const encryprion = require('../utilities/encryption')
 const mongoose = require('mongoose')
 const User = mongoose.model('User')
+const Thread = mongoose.model('Thread')
+const Answer = mongoose.model('Answer')
+
+const errorHandler = require('../utilities/error-handler')
 
 module.exports = {
   registerGet: (req, res) => {
@@ -10,27 +14,37 @@ module.exports = {
     let reqUser = req.body
     // Add validation
     // if (reqUser.username.lenght < 3)
-
-    let salt = encryprion.generateSalt()
-    let hashedPassword = encryprion.generateHashedPassword(salt, reqUser.password)
-
-    User.create({
-      username: reqUser.username,
-      firstName: reqUser.firstName,
-      lastName: reqUser.lastName,
-      salt: salt,
-      hashedPass: hashedPassword,
-      roles: ['User']
-    }).then(user => {
-      req.logIn(user, (err, user) => {
-        if (err) { // locals - can access in all views and ...
-          res.locals.globalError = err
-          res.render('users/register', user)
+    User.findOne({username: reqUser.username})
+      .then(user => {
+        if (user) {
+          res.locals.globalError = `User "${user.username}" is allready exist!`
+          res.render('users/register', {
+            user: reqUser
+          })
+          return
         }
 
-        res.redirect('/')
+        let salt = encryprion.generateSalt()
+        let hashedPassword = encryprion.generateHashedPassword(salt, reqUser.password)
+
+        User.create({
+          username: reqUser.username,
+          firstName: reqUser.firstName,
+          lastName: reqUser.lastName,
+          salt: salt,
+          hashedPass: hashedPassword,
+          roles: ['User']
+        }).then(user => {
+          req.logIn(user, (err, user) => {
+            if (err) { // locals - can access in all views and ...
+              res.locals.globalError = err
+              res.render('users/register', user)
+            }
+
+            res.redirect('/')
+          })
+        })
       })
-    })
   },
   logout: (req, res) => {
     req.logout()
@@ -65,8 +79,70 @@ module.exports = {
     })
   },
   profile: (req, res) => {
-    res.render('users/profile', {
-      user: req.user
-    })
+    let username = req.params.username
+    User.findOne({ username: username })
+      .then(user => {
+        Thread.find({ author: user._id })
+          .then(threads => {
+            Answer.find({ author: user._id })
+              // .populate('thread')
+              .then(answers => {
+                res.render('users/profile', {
+                  user: user,
+                  threads: threads,
+                  answers: answers
+                })
+              })
+          })
+      })
+  },
+  adminGet: (req, res) => {
+    User.find({ roles: { $ne: 'Admin' } })
+      .then(users => {
+        res.render('users/admin-add', {
+          users: users
+        })
+      })
+  },
+  adminPost: (req, res) => {
+    let userId = req.body.user
+    User.findByIdAndUpdate(userId, { $addToSet: { roles: 'Admin' } })
+      .then(() => {
+        res.redirect('/admins/all')
+      })
+  },
+  all: (req, res) => {
+    User.find({ roles: { $in: ['Admin'] } })
+      .then(admins => {
+        res.render('users/admin-all', {
+          admins: admins
+        })
+      })
+  },
+  block: (req, res) => {
+    let userId = req.params.id
+    console.log(userId)
+    User.findByIdAndUpdate(userId, { $set: { blocked: true } })
+      .then(user => {
+        res.redirect(`/profile/${user.username}`)
+      })
+      .catch(err => {
+        let message = errorHandler.handleMongooseError(err)
+        res.locals.globalError = message
+        res.redirect('/')
+      })
+  },
+  unblock: (req, res) => {
+    let userId = req.params.id
+    console.log(userId)
+    User.findByIdAndUpdate(userId, { $set: { blocked: false } })
+      .then(user => {
+        res.redirect(`/profile/${user.username}`)
+      })
+      .catch(err => {
+        let message = errorHandler.handleMongooseError(err)
+        res.locals.globalError = message
+        res.redirect('/')
+      })
   }
 }

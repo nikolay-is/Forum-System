@@ -10,7 +10,13 @@ module.exports = (app) => {
   app.get('/users/login', controllers.users.loginGet)
   app.post('/users/login', controllers.users.loginPost)
   app.post('/users/logout', controllers.users.logout)
-  app.get('/users/me', auth.isAuthenticated, controllers.users.profile)
+  app.get('/profile/:username', auth.isAuthenticated, controllers.users.profile)
+  app.post('/users/block/:id', controllers.users.block)
+  app.post('/users/unblock/:id', controllers.users.unblock)
+
+  app.get('/admins/add', auth.isInRole('Admin'), controllers.users.adminGet)
+  app.post('/admins/add', auth.isInRole('Admin'), controllers.users.adminPost)
+  app.get('/admins/all', auth.isInRole('Admin'), controllers.users.all)
 
   app.get('/add', auth.isAuthenticated, controllers.thread.addGet)
   app.post('/add', auth.isAuthenticated, controllers.thread.addPost)
@@ -20,12 +26,16 @@ module.exports = (app) => {
   app.post('/edit/:id', auth.isInRole('Admin'), controllers.thread.editPost)
 
   app.get('/post/:id/:name?', auth.isAuthenticated, controllers.thread.detailsGet)
-  app.post('/post/:id/:name?', auth.isAuthenticated, controllers.thread.detailsPost)
+  app.post('/post/:id/:name?', auth.isAuthenticated, controllers.answer.addPost)
 
   app.get('/category/add', auth.isInRole('Admin'), controllers.category.addGet)
   app.post('/category/add', auth.isInRole('Admin'), controllers.category.addPost)
   app.get('/category/delete/:id', auth.isInRole('Admin'), controllers.category.delete)
-  app.get('/categories', auth.isInRole('Admin'), controllers.category.list)
+  app.get('/categories', controllers.category.list)
+  app.get('/list/:name', controllers.category.getThreadsByCategory)
+
+  app.post('/like/:id', auth.isAuthenticated, controllers.thread.like)
+  app.post('/dislike/:id', auth.isAuthenticated, controllers.thread.dislike)
 
   // app.get('/xxx/add', auth.isInRole('Admin'), controllers.xxx.addGet)
   // app.post('/xxx/add', auth.isInRole('Admin'), controllers.xxx.addPost)

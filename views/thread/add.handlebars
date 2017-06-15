@@ -1,16 +1,26 @@
+<h1>Add thread</h1>
+
 <form action="/add" method="POST">
   Title
-  <input type="text" name="title" value="{{title}}" required />
+  <input type="text" name="title" value="{{thread.title}}" required />
   <br />
   Description
-  <textarea name="description" rows="10" required>{{description}}</textarea>
+  <textarea name="description" rows="10" required>{{thread.description}}</textarea>
   <br />
   Category
-  <select name="category" >
+  <select name="category">
     {{#each categories}}
-      <option value="{{this._id}}">{{this.name}}</option>
+      {{#if ../thread}}
+        {{#ifCond ../thread.category this._id}}
+          <option value="{{this._id}}" selected>{{this.name}}</option>
+        {{else}}`
+          <option value="{{this._id}}">{{this.name}}</option>
+        {{/ifCond}}
+      {{else}}
+        <option value="{{this._id}}">{{this.name}}</option>
+      {{/if}}
     {{/each}}
   </select>
   <br />
-  <input type="submit" value="Save" />
+  <input type="submit" value="Add" />
 </form>

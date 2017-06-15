@@ -28,6 +28,7 @@ module.exports = (app) => {
     if (req.user) {
       res.locals.currentUser = req.user
       res.locals.isAdmin = req.user.roles.indexOf('Admin') >= 0
+      res.locals.isBlocked = req.user.blocked
     }
 
     next()

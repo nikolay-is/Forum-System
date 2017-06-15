@@ -1,39 +1,33 @@
 const mongoose = require('mongoose')
 const Category = mongoose.model('Category')
+const Thread = mongoose.model('Thread')
 const errorHandler = require('../utilities/error-handler')
 
 module.exports = {
   addGet: (req, res) => {
-    Category.find()
-      .then((categories) => {
-        res.render('category/add', {categories: categories})
-      })
-      .catch(err => {
-        res.locals.globalError = errorHandler.handleMongooseError(err)
-        res.redirect('/categories')
-      })
+    res.render('category/add')
   },
   addPost: (req, res) => {
     let categoryReq = req.body
-    console.log(`req: ${categoryReq}`)
+
     Category.create({
       name: categoryReq.name
     })
-    .then((category) => {
-      console.log(category)
+    .then(() => {
       res.redirect('/categories')
     })
     .catch(err => {
       res.locals.globalError = errorHandler.handleMongooseError(err)
-      res.redirect('/categories')
+      res.redirect('/category/add', categoryReq)
     })
   },
   list: (req, res) => {
-    Category.find({})
+    Category.find()
     .then(categories => {
       if (!categories) {
         res.locals.globalError = 'Categories is empty!'
         res.redirect('/categories')
+        return
       }
       res.render('category/list', {
         categories: categories
@@ -41,7 +35,7 @@ module.exports = {
     })
     .catch(err => {
       res.locals.globalError = errorHandler.handleMongooseError(err)
-      res.render('category/list')
+      res.redirect('/categories')
     })
   },
   delete: (req, res) => {
@@ -53,6 +47,20 @@ module.exports = {
       .catch(err => {
         res.locals.globalError = errorHandler.handleMongooseError(err)
         res.redirect('/categories')
+      })
+  },
+  getThreadsByCategory: (req, res) => {
+    let catName = req.params.name
+    Category.findOne({ name: catName })
+      .then(category => {
+        Thread.find({category: category._id})
+          .populate('author')
+          .then(threads => {
+            res.render('category/threads-by-category', {
+              threads: threads,
+              category: category
+            })
+          })
       })
   }
 }
