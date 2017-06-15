@@ -1,0 +1,9 @@
+<h2>Delete answer</h2>
+
+<p>thread: {{answer.thread.title}}</p>
+<p>author: {{answer.author.username}}</p>
+
+<form method="post">
+  <textarea name="content" rows="10" disabled>{{answer.content}}</textarea>
+  <input type="submit" value="Delete" />
+</form>

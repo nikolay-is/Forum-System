@@ -1,0 +1,18 @@
+Step for install and run project
+
+
+1. Start the mongoDb server if not running as service
+2. Check connection string in file config/settings.js (port, ip, databasename)
+  database port: 27017
+  database name: forum-system
+  application port: 3000
+
+3. start terminal/console in project directory
+execute following command:
+
+4. "npm install"
+5. "npm start"
+
+6. Default login:
+User: admin
+Password: 123

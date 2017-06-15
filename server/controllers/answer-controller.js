@@ -51,5 +51,51 @@ module.exports = {
         res.redirect('/')
       })
     }
+  },
+  editGet: (req, res) => {
+    let id = req.params.id
+    Answer.findById(id)
+      .populate('author')
+      .populate('thread')
+      .then(answer => {
+        res.render('answer/edit', {
+          answer: answer
+        })
+      })
+  },
+  editPost: (req, res) => {
+    let id = req.params.id
+    let answerReq = req.body
+    Answer.findById(id)
+      .populate('author')
+      .populate('thread')
+      .then(answer => {
+        answer.content = answerReq.content
+        answer
+          .save()
+          .then(() => {
+            res.redirect(`/post/${answer.thread._id}/${answer.thread.title}`)
+          })
+      })
+  },
+  deleteGet: (req, res) => {
+    let id = req.params.id
+    Answer.findById(id)
+      .populate('author')
+      .populate('thread')
+      .then(answer => {
+        res.render('answer/delete', { answer: answer })
+      })
+  },
+  deletePost: (req, res) => {
+    let id = req.params.id
+    Answer.findByIdAndRemove(id)
+      .populate('thread')
+      .then(answer => {
+        Thread.findByIdAndUpdate(answer.thread._id, { $pull: { answer: { $in: [id] } } })
+          .then(() => {
+            res.redirect(`/post/${answer.thread._id}/${answer.thread.title}`)
+          })
+      })
   }
 }

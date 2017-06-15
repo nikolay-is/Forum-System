@@ -3,7 +3,7 @@ const auth = require('./auth')
 
 module.exports = (app) => {
   app.get('/', controllers.thread.index)
-  app.get('/about', auth.isAuthenticated, auth.isInRole('Admin'), controllers.home.about)
+  app.get('/about', controllers.home.about)
 
   app.get('/users/register', controllers.users.registerGet)
   app.post('/users/register', controllers.users.registerPost)
@@ -27,6 +27,11 @@ module.exports = (app) => {
 
   app.get('/post/:id/:name?', auth.isAuthenticated, controllers.thread.detailsGet)
   app.post('/post/:id/:name?', auth.isAuthenticated, controllers.answer.addPost)
+
+  app.get('/answer/edit/:id', auth.isInRole('Admin'), controllers.answer.editGet)
+  app.post('/answer/edit/:id', auth.isInRole('Admin'), controllers.answer.editPost)
+  app.get('/answer/delete/:id', auth.isInRole('Admin'), controllers.answer.deleteGet)
+  app.post('/answer/delete/:id', auth.isInRole('Admin'), controllers.answer.deletePost)
 
   app.get('/category/add', auth.isInRole('Admin'), controllers.category.addGet)
   app.post('/category/add', auth.isInRole('Admin'), controllers.category.addPost)
